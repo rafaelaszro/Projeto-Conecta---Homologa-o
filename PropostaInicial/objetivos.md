@@ -40,7 +40,7 @@ O Microsoft Teams é uma plataforma que combina calendário, reuniões, chats, c
 
 A definição do nome, ícone, logotipo, padrões de fontes e paleta de cores do CONECTA+ está documentada no arquivo abaixo.
 
-📄 [Visualizar documentação de Identidade Visual](PropostaInicial/topico3.pdf)
+📄 [Visualizar documentação de Identidade Visual](Topico3.pdf)
 
 ## Funcionalidades Previstas
 
