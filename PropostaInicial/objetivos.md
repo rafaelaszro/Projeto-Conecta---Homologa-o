@@ -36,6 +36,12 @@ O Microsoft Teams é uma plataforma que combina calendário, reuniões, chats, c
 
 **Pontos fracos:** pode apresentar maior consumo de recursos do dispositivo e possui uma interface mais complexa para usuários que ainda não estão familiarizados com a plataforma.
 
+## Identidade Visual
+
+A definição do nome, ícone, logotipo, padrões de fontes e paleta de cores do CONECTA+ está documentada no arquivo abaixo.
+
+📄 [Visualizar documentação de Identidade Visual](PropostaInicial/topico3.pdf)
+
 ## Funcionalidades Previstas
 
 - **Login:** login e cadastro de usuários.
