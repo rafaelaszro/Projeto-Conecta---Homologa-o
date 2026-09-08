@@ -58,7 +58,10 @@ export const MembroOrganizacaoSchema =
   },
 })
 export class Organizacao {
-  @Prop({ required: true, trim: true })
+  @Prop({
+    required: true,
+    trim: true,
+  })
   nome: string;
 
   @Prop()
