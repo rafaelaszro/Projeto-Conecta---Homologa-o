@@ -23,7 +23,9 @@ export class MembroComissao {
   })
   papel: PapelComissao;
 
-  @Prop({ default: Date.now })
+  @Prop({
+    default: Date.now,
+  })
   adicionadoEm: Date;
 }
 
@@ -35,9 +37,13 @@ export const MembroComissaoSchema =
     createdAt: 'criadoEm',
     updatedAt: 'atualizadoEm',
   },
+  versionKey: false,
 })
 export class Comissao {
-  @Prop({ required: true, trim: true })
+  @Prop({
+    required: true,
+    trim: true,
+  })
   nome: string;
 
   @Prop()
@@ -56,7 +62,9 @@ export class Comissao {
   })
   membros: MembroComissao[];
 
-  @Prop({ default: true })
+  @Prop({
+    default: true,
+  })
   ativo: boolean;
 }
 

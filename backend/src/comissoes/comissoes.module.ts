@@ -1,8 +1,17 @@
 import { Module } from '@nestjs/common';
 import { MongooseModule } from '@nestjs/mongoose';
-import { ComissoesService } from './comissoes.service.js';
+
 import { ComissoesController } from './comissoes.controller.js';
+import { ComissoesService } from './comissoes.service.js';
+
 import { Comissao, ComissaoSchema } from './schemas/comissao.schema.js';
+
+import { Usuario, UsuarioSchema } from '../usuarios/schemas/usuario.schema.js';
+
+import {
+  Organizacao,
+  OrganizacaoSchema,
+} from '../organizacoes/schemas/organizacao.schema.js';
 
 @Module({
   imports: [
@@ -10,6 +19,14 @@ import { Comissao, ComissaoSchema } from './schemas/comissao.schema.js';
       {
         name: Comissao.name,
         schema: ComissaoSchema,
+      },
+      {
+        name: Usuario.name,
+        schema: UsuarioSchema,
+      },
+      {
+        name: Organizacao.name,
+        schema: OrganizacaoSchema,
       },
     ]),
   ],
