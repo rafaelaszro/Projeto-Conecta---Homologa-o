@@ -2,7 +2,7 @@
  * Modelo de usuário do Conecta+ (Incremento 1).
  *
  * Fica em um módulo próprio porque é compartilhado pelo serviço de
- * autenticação, pelas telas e pelos dados de demonstração.
+ * autenticação e pelas telas.
  */
 
 /** Situação do usuário perante a organização a que ele pediu acesso. */

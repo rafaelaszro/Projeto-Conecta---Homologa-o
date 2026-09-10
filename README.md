@@ -52,26 +52,15 @@ Depois, leia o QR Code com o aplicativo **Expo Go** ou use `npm run android` /
 
 ### Servidor
 
-Enquanto a API (NestJS) do incremento não estiver publicada, o aplicativo usa as
-contas de demonstração de [`src/services/contasSimuladas.ts`](src/services/contasSimuladas.ts),
-que cobrem todas as situações de cadastro previstas:
-
-| E-mail | Senha | Situação |
-| --- | --- | --- |
-| `ana.ribeiro@conectamais.app` | `conecta2026` | Cadastro aprovado |
-| `bruno.carvalho@conectamais.app` | `conecta2026` | Aguardando aprovação |
-| `carla.souza@conectamais.app` | `conecta2026` | Solicitação recusada |
-| `diego.martins@conectamais.app` | `conecta2026` | Sem organização vinculada |
-| `eduarda.lima@conectamais.app` | `conecta2026` | Conta desativada |
-
-Para falar com o servidor real, defina a variável de ambiente e reinicie o Expo:
+O aplicativo usa exclusivamente a API NestJS. Defina a variável de ambiente e
+reinicie o Expo:
 
 ```bash
 EXPO_PUBLIC_API_URL=http://192.168.0.10:3000 npm start
 ```
 
-Com a variável definida, o aplicativo passa a chamar `POST /auth/login` e os
-dados de demonstração deixam de ser usados. Nenhuma tela precisa ser alterada.
+O aplicativo chama `POST /auth/login`. Se a variável não estiver definida, o
+login falhará informando que não foi possível conectar ao servidor.
 
 ## Estrutura
 
@@ -87,7 +76,7 @@ src/
 ├── constants/theme.ts       cores e tipografia da identidade visual
 ├── hooks/useLogin.ts        estado e regras da tela de login
 ├── models/usuario.ts        modelo de usuário e situações de acesso
-├── services/                autenticação e dados de demonstração
+├── services/                autenticação e comunicação com a API
 └── utils/validacao.ts       validações de formulário
 ```
 

@@ -7,14 +7,11 @@
  *   - o usuário solicita acesso a uma organização;
  *   - o administrador da organização aprova ou rejeita a solicitação.
  *
- * Enquanto a API (NestJS) do incremento não estiver publicada, o serviço usa as
- * contas de demonstração definidas em `contasSimuladas.ts`. Basta definir a
- * variável de ambiente EXPO_PUBLIC_API_URL para que as chamadas passem a ser
- * feitas contra o servidor real, sem alteração nas telas.
+ * O serviço usa exclusivamente a API NestJS configurada em
+ * `EXPO_PUBLIC_API_URL`.
  */
 
 import type { Usuario } from '@/models/usuario';
-import { buscarContaSimulada, LATENCIA_SIMULADA_MS } from './contasSimuladas';
 
 /** Motivos pelos quais o login pode falhar. */
 export const ERRO_LOGIN = {
@@ -39,11 +36,8 @@ export type ResultadoLogin =
   | { autenticado: true; usuario: Usuario; token: string }
   | { autenticado: false; erro: ErroLogin };
 
-/** URL da API do incremento. Quando ausente, o aplicativo usa as contas de demonstração. */
+/** URL da API do incremento. */
 export const URL_API = process.env.EXPO_PUBLIC_API_URL ?? null;
-
-/** Indica se as telas estão falando com o servidor real ou com os dados de demonstração. */
-export const USANDO_API_REAL = URL_API !== null;
 
 /** Mensagens exibidas ao usuário para cada falha de login. */
 export const MENSAGENS_ERRO_LOGIN: Record<ErroLogin, string> = {
@@ -58,6 +52,10 @@ export const MENSAGENS_ERRO_LOGIN: Record<ErroLogin, string> = {
 };
 
 async function autenticarNaApi(credenciais: Credenciais): Promise<ResultadoLogin> {
+  if (URL_API === null) {
+    return { autenticado: false, erro: ERRO_LOGIN.FALHA_CONEXAO };
+  }
+
   let resposta: Response;
 
   try {
@@ -83,31 +81,46 @@ async function autenticarNaApi(credenciais: Credenciais): Promise<ResultadoLogin
   }
 
   try {
-    const corpo = (await resposta.json()) as { usuario: Usuario; token: string };
-    return { autenticado: true, usuario: corpo.usuario, token: corpo.token };
+    const corpo = (await resposta.json()) as {
+      accessToken?: string;
+      token?: string;
+      usuario?: {
+        id: string;
+        nome: string;
+        email: string;
+        tipo?: string;
+        tema?: string;
+        statusAcesso?: Usuario['statusAcesso'];
+        organizacao?: string | null;
+      };
+    };
+
+    if (!corpo.accessToken && !corpo.token) {
+      return { autenticado: false, erro: ERRO_LOGIN.ERRO_SERVIDOR };
+    }
+
+    if (!corpo.usuario) {
+      return { autenticado: false, erro: ERRO_LOGIN.ERRO_SERVIDOR };
+    }
+
+    // O backend libera somente usuários ativos e ainda não envia os campos de
+    // organização/status usados pelas telas do incremento 1.
+    const usuario: Usuario = {
+      id: corpo.usuario.id,
+      nome: corpo.usuario.nome,
+      email: corpo.usuario.email,
+      statusAcesso: corpo.usuario.statusAcesso ?? 'ATIVO',
+      organizacao: corpo.usuario.organizacao ?? null,
+    };
+
+    return {
+      autenticado: true,
+      usuario,
+      token: corpo.accessToken ?? corpo.token!,
+    };
   } catch {
     return { autenticado: false, erro: ERRO_LOGIN.ERRO_SERVIDOR };
   }
-}
-
-async function autenticarComDadosDeDemonstracao(
-  credenciais: Credenciais,
-): Promise<ResultadoLogin> {
-  await new Promise((resolve) => setTimeout(resolve, LATENCIA_SIMULADA_MS));
-
-  const conta = buscarContaSimulada(credenciais.email);
-
-  if (conta === null || conta.senha !== credenciais.senha) {
-    return { autenticado: false, erro: ERRO_LOGIN.CREDENCIAIS_INVALIDAS };
-  }
-
-  if (conta.desativada) {
-    return { autenticado: false, erro: ERRO_LOGIN.CONTA_DESATIVADA };
-  }
-
-  const { senha: _senha, desativada: _desativada, ...usuario } = conta;
-
-  return { autenticado: true, usuario, token: `demonstracao.${conta.id}` };
 }
 
 /**
@@ -117,7 +130,5 @@ async function autenticarComDadosDeDemonstracao(
  * a tela exiba a mensagem correspondente em vez de tratar exceções.
  */
 export async function entrar(credenciais: Credenciais): Promise<ResultadoLogin> {
-  return USANDO_API_REAL
-    ? autenticarNaApi(credenciais)
-    : autenticarComDadosDeDemonstracao(credenciais);
+  return autenticarNaApi(credenciais);
 }
