@@ -6,7 +6,7 @@
  */
 
 /** Tamanho mínimo de senha aceito no cadastro e no login. */
-export const TAMANHO_MINIMO_SENHA = 8;
+export const TAMANHO_MINIMO_SENHA = 6;
 
 const EXPRESSAO_EMAIL = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
 
