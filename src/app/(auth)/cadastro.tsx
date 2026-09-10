@@ -9,13 +9,24 @@ import { BotaoPrimario } from '@/components/BotaoPrimario';
 import { CampoTexto } from '@/components/CampoTexto';
 import { LogoConecta } from '@/components/LogoConecta';
 import { GRADIENTE_FUNDO } from '@/constants/theme';
+import { useCadastro } from '@/hooks/useCadastro';
 
 export default function TelaCadastro() {
   const router = useRouter();
-  const [nome, definirNome] = useState('');
-  const [email, definirEmail] = useState('');
-  const [senha, definirSenha] = useState('');
-  const [confirmarSenha, definirConfirmarSenha] = useState('');
+  const {
+    nome,
+    email,
+    senha,
+    confirmarSenha,
+    erros,
+    erroGeral,
+    carregando,
+    definirNome,
+    definirEmail,
+    definirSenha,
+    definirConfirmarSenha,
+    submeter,
+  } = useCadastro();
   const [senhaVisivel, definirSenhaVisivel] = useState(false);
   const [confirmacaoVisivel, definirConfirmacaoVisivel] = useState(false);
 
@@ -34,13 +45,14 @@ export default function TelaCadastro() {
             <Text className="mt-1 font-regular text-[14px] leading-5 text-texto-medio">Cadastre seus dados para começar a usar o Conecta+.</Text>
 
             <View className="mt-6 gap-4">
-              <CampoTexto rotulo="Nome" icone="person-outline" placeholder="Seu nome completo" value={nome} onChangeText={definirNome} autoCapitalize="words" autoComplete="name" textContentType="name" />
-              <CampoTexto rotulo="E-mail" icone="mail-outline" placeholder="nome@organizacao.com" value={email} onChangeText={definirEmail} keyboardType="email-address" autoCapitalize="none" autoCorrect={false} autoComplete="email" textContentType="emailAddress" />
-              <CampoTexto rotulo="Senha" icone="lock-closed-outline" placeholder="Crie uma senha" value={senha} onChangeText={definirSenha} secureTextEntry={!senhaVisivel} autoCapitalize="none" autoCorrect={false} textContentType="newPassword" acaoFinal={{ icone: senhaVisivel ? 'eye-off-outline' : 'eye-outline', rotuloAcessivel: senhaVisivel ? 'Ocultar senha' : 'Mostrar senha', aoTocar: () => definirSenhaVisivel((visivel) => !visivel) }} />
-              <CampoTexto rotulo="Confirmar senha" icone="lock-closed-outline" placeholder="Digite a senha novamente" value={confirmarSenha} onChangeText={definirConfirmarSenha} secureTextEntry={!confirmacaoVisivel} autoCapitalize="none" autoCorrect={false} textContentType="newPassword" acaoFinal={{ icone: confirmacaoVisivel ? 'eye-off-outline' : 'eye-outline', rotuloAcessivel: confirmacaoVisivel ? 'Ocultar confirmação' : 'Mostrar confirmação', aoTocar: () => definirConfirmacaoVisivel((visivel) => !visivel) }} />
+              <CampoTexto rotulo="Nome" icone="person-outline" placeholder="Seu nome completo" value={nome} onChangeText={definirNome} erro={erros.nome} autoCapitalize="words" autoComplete="name" textContentType="name" />
+              <CampoTexto rotulo="E-mail" icone="mail-outline" placeholder="nome@organizacao.com" value={email} onChangeText={definirEmail} erro={erros.email} keyboardType="email-address" autoCapitalize="none" autoCorrect={false} autoComplete="email" textContentType="emailAddress" />
+              <CampoTexto rotulo="Senha" icone="lock-closed-outline" placeholder="Crie uma senha" value={senha} onChangeText={definirSenha} erro={erros.senha} secureTextEntry={!senhaVisivel} autoCapitalize="none" autoCorrect={false} textContentType="newPassword" acaoFinal={{ icone: senhaVisivel ? 'eye-off-outline' : 'eye-outline', rotuloAcessivel: senhaVisivel ? 'Ocultar senha' : 'Mostrar senha', aoTocar: () => definirSenhaVisivel((visivel) => !visivel) }} />
+              <CampoTexto rotulo="Confirmar senha" icone="lock-closed-outline" placeholder="Digite a senha novamente" value={confirmarSenha} onChangeText={definirConfirmarSenha} erro={erros.confirmarSenha} secureTextEntry={!confirmacaoVisivel} autoCapitalize="none" autoCorrect={false} textContentType="newPassword" acaoFinal={{ icone: confirmacaoVisivel ? 'eye-off-outline' : 'eye-outline', rotuloAcessivel: confirmacaoVisivel ? 'Ocultar confirmação' : 'Mostrar confirmação', aoTocar: () => definirConfirmacaoVisivel((visivel) => !visivel) }} />
             </View>
 
-            <View className="mt-6"><BotaoPrimario titulo="Criar conta" aoTocar={() => undefined} /></View>
+            {erroGeral ? <Text className="mt-5 text-center font-regular text-[13px] text-estado-erro">{erroGeral}</Text> : null}
+            <View className="mt-6"><BotaoPrimario titulo="Criar conta" aoTocar={submeter} carregando={carregando} /></View>
           </View>
 
           <View className="mt-7 flex-row items-center justify-center">

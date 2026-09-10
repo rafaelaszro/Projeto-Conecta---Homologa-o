@@ -8,6 +8,9 @@
 /** Tamanho mínimo de senha aceito no cadastro e no login. */
 export const TAMANHO_MINIMO_SENHA = 6;
 
+/** Tamanho mínimo do nome aceito no cadastro. */
+export const TAMANHO_MINIMO_NOME = 3;
+
 const EXPRESSAO_EMAIL = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
 
 /** Remove espaços das pontas e normaliza o e-mail para comparação. */
@@ -44,6 +47,30 @@ export function validarSenha(senha: string): string | null {
 
   if (senha.length < TAMANHO_MINIMO_SENHA) {
     return `A senha deve ter ao menos ${TAMANHO_MINIMO_SENHA} caracteres.`;
+  }
+
+  return null;
+}
+
+export function validarNome(nome: string): string | null {
+  if (nome.trim().length === 0) {
+    return 'Informe o seu nome.';
+  }
+
+  if (nome.trim().length < TAMANHO_MINIMO_NOME) {
+    return `O nome deve ter ao menos ${TAMANHO_MINIMO_NOME} caracteres.`;
+  }
+
+  return null;
+}
+
+export function validarConfirmacaoSenha(senha: string, confirmacao: string): string | null {
+  if (confirmacao.length === 0) {
+    return 'Confirme a sua senha.';
+  }
+
+  if (senha !== confirmacao) {
+    return 'As senhas não coincidem.';
   }
 
   return null;

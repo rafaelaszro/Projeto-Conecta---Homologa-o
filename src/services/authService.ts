@@ -32,6 +32,12 @@ export type Credenciais = {
   senha: string;
 };
 
+export type DadosCadastro = {
+  nome: string;
+  email: string;
+  senha: string;
+};
+
 export type ResultadoLogin =
   | { autenticado: true; usuario: Usuario; token: string }
   | { autenticado: false; erro: ErroLogin };
@@ -131,4 +137,40 @@ async function autenticarNaApi(credenciais: Credenciais): Promise<ResultadoLogin
  */
 export async function entrar(credenciais: Credenciais): Promise<ResultadoLogin> {
   return autenticarNaApi(credenciais);
+}
+
+export type ResultadoCadastro =
+  | { criado: true }
+  | { criado: false; erro: 'EMAIL_EXISTENTE' | 'ERRO_VALIDACAO' | 'FALHA_CONEXAO' | 'ERRO_SERVIDOR' };
+
+export async function cadastrar(dados: DadosCadastro): Promise<ResultadoCadastro> {
+  if (URL_API === null) {
+    return { criado: false, erro: 'FALHA_CONEXAO' };
+  }
+
+  let resposta: Response;
+
+  try {
+    resposta = await fetch(`${URL_API}/usuarios`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(dados),
+    });
+  } catch {
+    return { criado: false, erro: 'FALHA_CONEXAO' };
+  }
+
+  if (resposta.status === 409) {
+    return { criado: false, erro: 'EMAIL_EXISTENTE' };
+  }
+
+  if (resposta.status === 400) {
+    return { criado: false, erro: 'ERRO_VALIDACAO' };
+  }
+
+  if (!resposta.ok) {
+    return { criado: false, erro: 'ERRO_SERVIDOR' };
+  }
+
+  return { criado: true };
 }
