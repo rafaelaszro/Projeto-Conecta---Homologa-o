@@ -26,8 +26,13 @@ type CampoTextoProps = TextInputProps & {
   };
 };
 
+/** Altura do campo de uma linha e do campo de texto longo. */
+const ALTURA_PADRAO = 56;
+const ALTURA_MULTILINHA = 120;
+const FOLGA_VERTICAL = 16;
+
 export const CampoTexto = forwardRef<TextInput, CampoTextoProps>(function CampoTexto(
-  { rotulo, icone, erro = null, acaoFinal, onFocus, onBlur, ...props },
+  { rotulo, icone, erro = null, acaoFinal, multiline = false, onFocus, onBlur, ...props },
   ref,
 ) {
   const [focado, definirFocado] = useState(false);
@@ -41,14 +46,22 @@ export const CampoTexto = forwardRef<TextInput, CampoTextoProps>(function CampoT
       <Text className="mb-2 font-medium text-[13px] text-texto-medio">{rotulo}</Text>
 
       <View
-        className="w-full flex-row items-center rounded-2xl bg-superficie-campo px-4"
-        style={{ borderWidth: 1.5, borderColor: corDaBorda, height: 56 }}
+        className="w-full flex-row rounded-2xl bg-superficie-campo px-4"
+        style={{
+          borderWidth: 1.5,
+          borderColor: corDaBorda,
+          height: multiline ? ALTURA_MULTILINHA : ALTURA_PADRAO,
+          alignItems: multiline ? 'flex-start' : 'center',
+          paddingVertical: multiline ? FOLGA_VERTICAL : 0,
+        }}
       >
         <Ionicons name={icone} size={20} color={corDoIcone} />
 
         <TextInput
           ref={ref}
-          className="ml-3 h-full min-w-0 flex-1 font-regular text-[15px] text-texto-forte"
+          multiline={multiline}
+          textAlignVertical={multiline ? 'top' : 'center'}
+          className={`ml-3 min-w-0 flex-1 font-regular text-[15px] text-texto-forte ${multiline ? '' : 'h-full'}`}
           placeholderTextColor={CORES.TEXTO_FRACO}
           accessibilityLabel={rotulo}
           accessibilityHint={erro ?? undefined}

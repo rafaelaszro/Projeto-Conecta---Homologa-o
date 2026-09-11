@@ -16,6 +16,8 @@ type BotaoPrimarioProps = {
   /** Exibe o indicador de progresso e bloqueia novos toques. */
   carregando?: boolean;
   desabilitado?: boolean;
+  /** Texto exibido ao lado do indicador de progresso. */
+  tituloCarregando?: string;
 };
 
 export function BotaoPrimario({
@@ -23,6 +25,7 @@ export function BotaoPrimario({
   aoTocar,
   carregando = false,
   desabilitado = false,
+  tituloCarregando = 'Entrando...',
 }: BotaoPrimarioProps) {
   const bloqueado = desabilitado || carregando;
 
@@ -45,7 +48,7 @@ export function BotaoPrimario({
         {carregando ? (
           <View className="flex-row items-center">
             <ActivityIndicator color={CORES.BRANCO} />
-            <Text className="ml-3 font-semibold text-[15px] text-white">Entrando...</Text>
+            <Text className="ml-3 font-semibold text-[15px] text-white">{tituloCarregando}</Text>
           </View>
         ) : (
           <Text className="font-semibold text-[15px] text-white">{titulo}</Text>

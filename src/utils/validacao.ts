@@ -75,3 +75,32 @@ export function validarConfirmacaoSenha(senha: string, confirmacao: string): str
 
   return null;
 }
+
+/** Tamanho mínimo do nome de organização, igual ao exigido pelo backend. */
+export const TAMANHO_MINIMO_NOME_ORGANIZACAO = 2;
+
+/** Tamanho máximo da descrição da organização. */
+export const TAMANHO_MAXIMO_DESCRICAO_ORGANIZACAO = 200;
+
+export function validarNomeOrganizacao(nome: string): string | null {
+  const valor = nome.trim();
+
+  if (valor.length === 0) {
+    return 'Informe o nome da organização.';
+  }
+
+  if (valor.length < TAMANHO_MINIMO_NOME_ORGANIZACAO) {
+    return `O nome deve ter ao menos ${TAMANHO_MINIMO_NOME_ORGANIZACAO} caracteres.`;
+  }
+
+  return null;
+}
+
+/** A descrição é opcional, por isso o campo vazio é considerado válido. */
+export function validarDescricaoOrganizacao(descricao: string): string | null {
+  if (descricao.trim().length > TAMANHO_MAXIMO_DESCRICAO_ORGANIZACAO) {
+    return `A descrição deve ter no máximo ${TAMANHO_MAXIMO_DESCRICAO_ORGANIZACAO} caracteres.`;
+  }
+
+  return null;
+}

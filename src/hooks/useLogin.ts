@@ -133,7 +133,13 @@ export function useLogin() {
 
     router.replace({
       pathname: '/inicio',
-      params: { nome: resultado.usuario.nome, organizacao: resultado.usuario.organizacao ?? '' },
+      params: {
+        // O identificador segue para as telas que ainda precisam informar o
+        // usuário ao backend, enquanto o guard de JWT não existe.
+        id: resultado.usuario.id,
+        nome: resultado.usuario.nome,
+        organizacao: resultado.usuario.organizacao ?? '',
+      },
     });
   }, [carregando, email, senha, router]);
 

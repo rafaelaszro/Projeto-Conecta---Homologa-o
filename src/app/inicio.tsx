@@ -1,8 +1,10 @@
 /**
  * Destino do login bem-sucedido.
  *
- * Confirma a autenticação e a organização vinculada. As telas de reuniões,
- * calendário e histórico descritas na proposta entram nos incrementos seguintes.
+ * Confirma a autenticação e a organização vinculada, e dá acesso à solicitação
+ * de criação de organização do requisito "Cadastro de organização". As telas de
+ * reuniões, calendário e histórico descritas na proposta entram nos incrementos
+ * seguintes.
  */
 
 import { Pressable, Text, View } from 'react-native';
@@ -15,7 +17,12 @@ import { CORES } from '@/constants/theme';
 
 export default function TelaInicio() {
   const router = useRouter();
-  const { nome, organizacao } = useLocalSearchParams<{ nome?: string; organizacao?: string }>();
+
+  const { id, nome, organizacao } = useLocalSearchParams<{
+    id?: string;
+    nome?: string;
+    organizacao?: string;
+  }>();
 
   return (
     <SafeAreaView className="flex-1 bg-superficie-fundo">
@@ -57,6 +64,29 @@ export default function TelaInicio() {
             reuniões e histórico — entram nos incrementos seguintes.
           </Text>
         </View>
+
+        <Pressable
+          onPress={() =>
+            router.push({ pathname: '/organizacao/cadastro', params: { usuarioId: id ?? '' } })
+          }
+          accessibilityRole="button"
+          accessibilityLabel="Criar organização"
+          className="mt-4 flex-row items-center rounded-3xl bg-superficie-cartao p-5"
+          style={({ pressed }) => ({ opacity: pressed ? 0.9 : 1 })}
+        >
+          <View className="h-11 w-11 items-center justify-center rounded-full bg-superficie-campo">
+            <Ionicons name="business-outline" size={20} color={CORES.AZUL} />
+          </View>
+
+          <View className="ml-3 flex-1">
+            <Text className="font-semibold text-[14px] text-texto-forte">Criar organização</Text>
+            <Text className="mt-1 font-regular text-[13px] leading-5 text-texto-medio">
+              Envie o cadastro e aguarde a autorização do administrador do sistema.
+            </Text>
+          </View>
+
+          <Ionicons name="chevron-forward" size={18} color={CORES.TEXTO_FRACO} />
+        </Pressable>
       </View>
     </SafeAreaView>
   );
