@@ -18,6 +18,7 @@ export class MembroComissao {
   usuarioId: Types.ObjectId;
 
   @Prop({
+    type: String,
     enum: PapelComissao,
     required: true,
   })

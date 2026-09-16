@@ -7,7 +7,7 @@ import {
   MinLength,
 } from 'class-validator';
 
-import { TipoUsuario } from '../schemas/usuario.schema.js';
+import { TemaUsuario, TipoUsuario } from '../schemas/usuario.schema.js';
 
 export class UpdateUsuarioDto {
   @IsOptional()
@@ -21,7 +21,7 @@ export class UpdateUsuarioDto {
 
   @IsOptional()
   @IsString()
-  @MinLength(6)
+  @MinLength(8)
   senha?: string;
 
   @IsOptional()
@@ -29,8 +29,8 @@ export class UpdateUsuarioDto {
   tipo?: TipoUsuario;
 
   @IsOptional()
-  @IsString()
-  tema?: string;
+  @IsEnum(TemaUsuario)
+  tema?: TemaUsuario;
 
   @IsOptional()
   @IsBoolean()

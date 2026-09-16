@@ -11,7 +11,7 @@
  * `EXPO_PUBLIC_API_URL`.
  */
 
-import type { Usuario } from '@/models/usuario';
+import { TEMAS, type Usuario } from '@/models/usuario';
 
 /** Motivos pelos quais o login pode falhar. */
 export const ERRO_LOGIN = {
@@ -117,6 +117,10 @@ async function autenticarNaApi(credenciais: Credenciais): Promise<ResultadoLogin
       email: corpo.usuario.email,
       statusAcesso: corpo.usuario.statusAcesso ?? 'ATIVO',
       organizacao: corpo.usuario.organizacao ?? null,
+      tema:
+        corpo.usuario.tema === TEMAS.CLARO || corpo.usuario.tema === TEMAS.ESCURO
+          ? corpo.usuario.tema
+          : TEMAS.SISTEMA,
     };
 
     return {
@@ -173,4 +177,54 @@ export async function cadastrar(dados: DadosCadastro): Promise<ResultadoCadastro
   }
 
   return { criado: true };
+}
+
+export async function solicitarRecuperacao(email: string) {
+  if (!URL_API) {
+    return { sucesso: false as const, mensagem: 'Não foi possível falar com o servidor.' };
+  }
+
+  try {
+    const resposta = await fetch(`${URL_API}/auth/recuperar-conta`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email }),
+    });
+
+    if (!resposta.ok) {
+      return { sucesso: false as const, mensagem: 'Não foi possível solicitar a recuperação.' };
+    }
+
+    const corpo = (await resposta.json()) as { mensagem: string };
+    return { sucesso: true as const, mensagem: corpo.mensagem };
+  } catch {
+    return { sucesso: false as const, mensagem: 'Não foi possível falar com o servidor.' };
+  }
+}
+
+export async function redefinirSenha(token: string, novaSenha: string) {
+  if (!URL_API) {
+    return { sucesso: false as const, mensagem: 'Não foi possível falar com o servidor.' };
+  }
+
+  try {
+    const resposta = await fetch(`${URL_API}/auth/redefinir-senha`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ token, novaSenha }),
+    });
+
+    const corpo = (await resposta.json().catch(() => null)) as { mensagem?: string; message?: string } | null;
+
+    if (!resposta.ok) {
+      return {
+        sucesso: false as const,
+        mensagem: corpo?.message ?? 'O link de recuperação é inválido ou expirou.',
+      };
+    }
+
+    return { sucesso: true as const, mensagem: corpo?.mensagem ?? 'Senha redefinida.' };
+  } catch {
+    return { sucesso: false as const, mensagem: 'Não foi possível falar com o servidor.' };
+  }
 }

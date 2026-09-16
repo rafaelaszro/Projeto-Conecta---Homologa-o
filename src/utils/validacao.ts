@@ -6,7 +6,7 @@
  */
 
 /** Tamanho mínimo de senha aceito no cadastro e no login. */
-export const TAMANHO_MINIMO_SENHA = 6;
+export const TAMANHO_MINIMO_SENHA = 8;
 
 /** Tamanho mínimo do nome aceito no cadastro. */
 export const TAMANHO_MINIMO_NOME = 3;

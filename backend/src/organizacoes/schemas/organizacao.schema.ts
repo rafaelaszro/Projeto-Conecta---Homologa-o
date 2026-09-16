@@ -30,12 +30,14 @@ export class MembroOrganizacao {
   usuarioId: Types.ObjectId;
 
   @Prop({
+    type: String,
     enum: PapelOrganizacao,
     required: true,
   })
   papel: PapelOrganizacao;
 
   @Prop({
+    type: String,
     enum: StatusMembroOrganizacao,
     default: StatusMembroOrganizacao.PENDENTE,
   })
@@ -68,6 +70,7 @@ export class Organizacao {
   descricao?: string;
 
   @Prop({
+    type: String,
     enum: StatusOrganizacao,
     default: StatusOrganizacao.PENDENTE,
   })

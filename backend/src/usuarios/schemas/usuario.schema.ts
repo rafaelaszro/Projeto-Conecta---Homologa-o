@@ -8,6 +8,12 @@ export enum TipoUsuario {
   ADMIN_SISTEMA = 'ADMIN_SISTEMA',
 }
 
+export enum TemaUsuario {
+  CLARO = 'claro',
+  ESCURO = 'escuro',
+  SISTEMA = 'sistema',
+}
+
 @Schema({
   timestamps: {
     createdAt: 'criadoEm',
@@ -36,15 +42,24 @@ export class Usuario {
   senhaHash: string;
 
   @Prop({
+    type: String,
     enum: TipoUsuario,
     default: TipoUsuario.USUARIO,
   })
   tipo: TipoUsuario;
 
   @Prop({
-    default: 'claro',
+    type: String,
+    enum: TemaUsuario,
+    default: TemaUsuario.SISTEMA,
   })
-  tema: string;
+  tema: TemaUsuario;
+
+  @Prop({ select: false })
+  resetSenhaTokenHash?: string;
+
+  @Prop({ select: false })
+  resetSenhaExpiraEm?: Date;
 
   @Prop({
     default: true,

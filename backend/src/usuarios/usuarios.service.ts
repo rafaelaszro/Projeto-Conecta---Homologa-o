@@ -16,6 +16,8 @@ import { Usuario, UsuarioDocument } from './schemas/usuario.schema.js';
 import { CreateUsuarioDto } from './dto/create-usuario.dto.js';
 
 import { UpdateUsuarioDto } from './dto/update-usuario.dto.js';
+import { AtualizarPerfilDto } from './dto/atualizar-perfil.dto.js';
+import { AlterarSenhaDto } from './dto/alterar-senha.dto.js';
 
 @Injectable()
 export class UsuariosService {
@@ -39,9 +41,7 @@ export class UsuariosService {
       nome: createUsuarioDto.nome,
       email,
       senhaHash,
-      tipo: createUsuarioDto.tipo,
       tema: createUsuarioDto.tema,
-      ativo: createUsuarioDto.ativo,
     });
 
     return this.usuarioModel.findById(usuario._id).exec();
@@ -115,6 +115,67 @@ export class UsuariosService {
     await usuario.save();
 
     return this.usuarioModel.findById(id).exec();
+  }
+
+  async atualizarPerfil(id: string, atualizarPerfilDto: AtualizarPerfilDto) {
+    this.validarId(id);
+
+    const usuario = await this.usuarioModel.findById(id).exec();
+
+    if (!usuario) {
+      throw new NotFoundException('Usuário não encontrado');
+    }
+
+    if (atualizarPerfilDto.email) {
+      const email = atualizarPerfilDto.email.toLowerCase().trim();
+      const usuarioComMesmoEmail = await this.usuarioModel
+        .findOne({ email, _id: { $ne: id } })
+        .exec();
+
+      if (usuarioComMesmoEmail) {
+        throw new ConflictException('Já existe um usuário com este email');
+      }
+
+      usuario.email = email;
+    }
+
+    if (atualizarPerfilDto.nome !== undefined) {
+      usuario.nome = atualizarPerfilDto.nome.trim();
+    }
+
+    if (atualizarPerfilDto.tema !== undefined) {
+      usuario.tema = atualizarPerfilDto.tema;
+    }
+
+    await usuario.save();
+    return usuario;
+  }
+
+  async alterarSenha(id: string, alterarSenhaDto: AlterarSenhaDto) {
+    this.validarId(id);
+
+    const usuario = await this.usuarioModel.findById(id).select('+senhaHash').exec();
+
+    if (!usuario) {
+      throw new NotFoundException('Usuário não encontrado');
+    }
+
+    const senhaAtualValida = await bcrypt.compare(alterarSenhaDto.senhaAtual, usuario.senhaHash);
+
+    if (!senhaAtualValida) {
+      throw new BadRequestException('A senha atual está incorreta');
+    }
+
+    const senhaRepetida = await bcrypt.compare(alterarSenhaDto.novaSenha, usuario.senhaHash);
+
+    if (senhaRepetida) {
+      throw new BadRequestException('A nova senha deve ser diferente da senha atual');
+    }
+
+    usuario.senhaHash = await bcrypt.hash(alterarSenhaDto.novaSenha, 10);
+    await usuario.save();
+
+    return { mensagem: 'Senha alterada com sucesso' };
   }
 
   async remover(id: string) {

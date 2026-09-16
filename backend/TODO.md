@@ -1,12 +1,10 @@
-## TODO - pra finalizar autenticação JWT
+## TODO - pra finalizar autorização
 
 - testar `POST /auth/login`.
-- criar `JwtAuthGuard`.
-- validar token via `Authorization: Bearer TOKEN`.
 - proteger rotas de usuários, organizações e comissões.
-- manter públicas apenas login e cadastro, se necessário.
+- manter públicas apenas login, cadastro e recuperação de conta.
 - testar token válido, inválido, expirado e usuário desativado.
-- no React Native, salvar o token com `Expo SecureStore` e enviá-lo nas requisições protegidas.
+- implementar autorização por papel para administradores do sistema e das organizações.
 
 - tratar exceções com msg personalizada
   {

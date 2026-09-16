@@ -5,9 +5,11 @@ import { UsuariosController } from './usuarios.controller.js';
 import { UsuariosService } from './usuarios.service.js';
 
 import { Usuario, UsuarioSchema } from './schemas/usuario.schema.js';
+import { AuthModule } from '../auth/auth.module.js';
 
 @Module({
   imports: [
+    AuthModule,
     MongooseModule.forFeature([
       {
         name: Usuario.name,

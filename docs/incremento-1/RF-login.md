@@ -160,8 +160,5 @@ Definidas em `src/models/usuario.ts`:
 
 ## Pendências desta etapa
 
-- Publicar a rota `POST /auth/login` na API (NestJS) e apontar
-  `EXPO_PUBLIC_API_URL` para ela.
-- Implementar as telas de cadastro de usuário e de recuperação de conta, hoje
-  presentes apenas como destino de navegação.
+- Configurar `EXPO_PUBLIC_API_URL` para a API NestJS em cada ambiente de teste.
 - Transcrever este documento para o formulário padrão da disciplina.

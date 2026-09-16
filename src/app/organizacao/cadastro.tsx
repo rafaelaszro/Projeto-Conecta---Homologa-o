@@ -10,7 +10,7 @@
  * organização ainda depende da análise do administrador do sistema.
  */
 
-import { KeyboardAvoidingView, Platform, Pressable, ScrollView, Text, View } from 'react-native';
+import { KeyboardAvoidingView, Platform, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
@@ -22,9 +22,12 @@ import { CampoTexto } from '@/components/CampoTexto';
 import { LogoConecta } from '@/components/LogoConecta';
 import { CORES, GRADIENTE_FUNDO } from '@/constants/theme';
 import { useCadastroOrganizacao } from '@/hooks/useCadastroOrganizacao';
+import { useTema } from '@/contexts/TemaContext';
 
 export default function TelaCadastroOrganizacao() {
   const router = useRouter();
+  const { cores, temaEfetivo } = useTema();
+  const gradiente = temaEfetivo === 'escuro' ? [cores.fundo, '#15182d', cores.fundo] as const : GRADIENTE_FUNDO;
 
   // Enquanto o backend não tem o guard de JWT, o identificador do usuário chega
   // pela navegação, no mesmo formato já usado pela tela de início.
@@ -46,15 +49,15 @@ export default function TelaCadastroOrganizacao() {
   } = useCadastroOrganizacao(usuarioId ?? null);
 
   return (
-    <LinearGradient colors={[...GRADIENTE_FUNDO]} style={{ flex: 1 }}>
-      <SafeAreaView className="flex-1" edges={['top', 'bottom']}>
+    <LinearGradient colors={[...gradiente]} style={{ flex: 1 }}>
+      <SafeAreaView style={styles.flex} edges={['top', 'bottom']}>
         <KeyboardAvoidingView
-          className="flex-1"
+          style={styles.flex}
           behavior={Platform.OS === 'ios' ? 'padding' : undefined}
         >
           <ScrollView
-            className="flex-1"
-            contentContainerClassName="grow px-6 py-5"
+            style={styles.flex}
+            contentContainerStyle={styles.conteudoRolagem}
             keyboardShouldPersistTaps="handled"
             showsVerticalScrollIndicator={false}
           >
@@ -63,57 +66,57 @@ export default function TelaCadastroOrganizacao() {
               accessibilityRole="button"
               accessibilityLabel="Voltar"
               hitSlop={10}
-              className="h-11 w-11 items-center justify-center rounded-full bg-superficie-cartao"
+              style={({ pressed }) => [styles.botaoVoltar, { backgroundColor: cores.cartao }, pressed && styles.pressionado]}
             >
-              <Ionicons name="arrow-back" size={20} color={CORES.TEXTO_FORTE} />
+              <Ionicons name="arrow-back" size={20} color={cores.textoForte} />
             </Pressable>
 
-            <View className="mt-5 items-center">
+            <View style={styles.logo}>
               <LogoConecta largura={156} />
             </View>
 
-            <View className="mt-7 rounded-3xl bg-superficie-cartao p-6 shadow-sm shadow-black/5">
+            <View style={[styles.cartao, { backgroundColor: cores.cartao }]}>
               {enviada ? (
                 <>
-                  <View className="h-12 w-12 items-center justify-center rounded-full bg-superficie-campo">
+                  <View style={[styles.iconeSituacao, { backgroundColor: cores.campo }]}>
                     <Ionicons name="time" size={24} color={CORES.ALERTA} />
                   </View>
 
-                  <Text className="mt-4 font-bold text-[22px] text-texto-forte">
+                  <Text style={[styles.tituloEnviado, { color: cores.textoForte }]}>
                     Solicitação enviada
                   </Text>
 
-                  <Text className="mt-2 font-regular text-[14px] leading-5 text-texto-medio">
+                  <Text style={[styles.descricaoEnviado, { color: cores.textoMedio }]}>
                     A organização {nome.trim()} foi cadastrada e aguarda a autorização de um
                     administrador do sistema. Você será avisado assim que ela for analisada.
                   </Text>
 
-                  <View className="mt-5 self-start rounded-full bg-superficie-campo px-4 py-2">
-                    <Text className="font-medium text-[12px] text-texto-medio">
+                  <View style={[styles.etiqueta, { backgroundColor: cores.campo }]}>
+                    <Text style={[styles.textoEtiqueta, { color: cores.textoMedio }]}>
                       Situação atual: aguardando autorização
                     </Text>
                   </View>
 
-                  <View className="mt-6">
+                  <View style={styles.botao}>
                     <BotaoPrimario titulo="Voltar ao início" aoTocar={() => router.back()} />
                   </View>
                 </>
               ) : (
                 <>
-                  <Text className="font-bold text-[22px] text-texto-forte">Criar organização</Text>
+                  <Text style={[styles.titulo, { color: cores.textoForte }]}>Criar organização</Text>
 
-                  <Text className="mt-1 font-regular text-[14px] leading-5 text-texto-medio">
+                  <Text style={[styles.descricao, { color: cores.textoMedio }]}>
                     Informe os dados da organização. O cadastro passa pela autorização de um
                     administrador do sistema antes de ficar disponível.
                   </Text>
 
                   {aviso ? (
-                    <View className="mt-5">
+                    <View style={styles.aviso}>
                       <AvisoFormulario aviso={aviso} />
                     </View>
                   ) : null}
 
-                  <View className="mt-6 gap-4">
+                  <View style={styles.campos}>
                     <CampoTexto
                       rotulo="Nome da organização"
                       icone="business-outline"
@@ -141,15 +144,14 @@ export default function TelaCadastroOrganizacao() {
                       />
 
                       <Text
-                        className="mt-2 text-right font-regular text-[12px]"
-                        style={{ color: descricaoExcedeu ? CORES.ERRO : CORES.TEXTO_FRACO }}
+                        style={[styles.contador, { color: descricaoExcedeu ? CORES.ERRO : CORES.TEXTO_FRACO }]}
                       >
                         {caracteresUsados}/{limiteDeCaracteres}
                       </Text>
                     </View>
                   </View>
 
-                  <View className="mt-6">
+                  <View style={styles.botao}>
                     <BotaoPrimario
                       titulo="Enviar solicitação"
                       aoTocar={submeter}
@@ -166,3 +168,33 @@ export default function TelaCadastroOrganizacao() {
     </LinearGradient>
   );
 }
+
+const styles = StyleSheet.create({
+  flex: { flex: 1 },
+  conteudoRolagem: { flexGrow: 1, paddingHorizontal: 24, paddingVertical: 20 },
+  botaoVoltar: { width: 44, height: 44, alignItems: 'center', justifyContent: 'center', borderRadius: 22, backgroundColor: CORES.CARTAO },
+  pressionado: { opacity: 0.85 },
+  logo: { marginTop: 20, alignItems: 'center' },
+  cartao: {
+    marginTop: 28,
+    borderRadius: 24,
+    backgroundColor: CORES.CARTAO,
+    padding: 24,
+    shadowColor: CORES.PRETO,
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.05,
+    shadowRadius: 4,
+    elevation: 2,
+  },
+  iconeSituacao: { width: 48, height: 48, alignItems: 'center', justifyContent: 'center', borderRadius: 24, backgroundColor: CORES.CAMPO },
+  titulo: { fontFamily: 'Poppins_700Bold', fontSize: 22, color: CORES.TEXTO_FORTE },
+  tituloEnviado: { marginTop: 16, fontFamily: 'Poppins_700Bold', fontSize: 22, color: CORES.TEXTO_FORTE },
+  descricao: { marginTop: 4, fontFamily: 'Poppins_400Regular', fontSize: 14, lineHeight: 20, color: CORES.TEXTO_MEDIO },
+  descricaoEnviado: { marginTop: 8, fontFamily: 'Poppins_400Regular', fontSize: 14, lineHeight: 20, color: CORES.TEXTO_MEDIO },
+  etiqueta: { alignSelf: 'flex-start', marginTop: 20, borderRadius: 999, backgroundColor: CORES.CAMPO, paddingHorizontal: 16, paddingVertical: 8 },
+  textoEtiqueta: { fontFamily: 'Poppins_500Medium', fontSize: 12, color: CORES.TEXTO_MEDIO },
+  aviso: { marginTop: 20 },
+  campos: { marginTop: 24, gap: 16 },
+  contador: { marginTop: 8, textAlign: 'right', fontFamily: 'Poppins_400Regular', fontSize: 12 },
+  botao: { marginTop: 24 },
+});

@@ -74,7 +74,7 @@ A definição do nome, ícone, logotipo, padrões de fontes e paleta de cores do
 ## Tecnologias para o APP
 
 - **React Native** - Linguagem principal para o desenvolvimento da aplicação, compatível com Android e iOS.
-- **NativeWind** - Permite aplicar os estilos diretamente nos componentes por meio de classes, mantendo a padronização visual entre as telas.
+- **StyleSheet do React Native** - Centraliza estilos em objetos tipados e utiliza apenas a API nativa do React Native, preservando o padrão visual e a execução em Android e iOS.
 - **Expo** - Disponibiliza o projeto React Native previamente configurado e permite executar e testar o aplicativo diretamente no dispositivo durante o desenvolvimento, sem necessidade de compilação manual.
 - **TypeScript / JavaScript** - Linguagem utilizada na construção das telas, da navegação entre elas e das funções que se comunicam com o servidor.
 - **Cliente HTTP** - Responsável por realizar as chamadas às rotas do servidor e receber as respostas que alimentam as telas do aplicativo.
@@ -151,4 +151,4 @@ Os testes devem acompanhar a evolução do sistema e gerar evidências dos resul
 
 O CONECTA+ apresenta-se como uma solução intencionalmente mais simples do que as grandes plataformas existentes. O valor do projeto não está em oferecer mais funcionalidades do que Google Calendar, Google Meet ou Microsoft Teams, mas em reunir as principais funções de gerenciamento de reuniões em um fluxo mobile coerente, com código aberto e escopo controlado.
 
-A proposta técnica baseada em React Native, Expo, NativeWind, NestJS e MongoDB é compatível com um protótipo acadêmico multiplataforma e permite separar interface, regras e dados de forma organizada. Cada funcionalidade adicionada deve contribuir para resolver um problema real relacionado às reuniões e se integrar ao fluxo de antes, durante e depois do encontro, sem transformar o CONECTA+ em uma suíte genérica.
+A proposta técnica baseada em React Native, Expo, StyleSheet, NestJS e MongoDB é compatível com um protótipo acadêmico multiplataforma e permite separar interface, regras e dados de forma organizada. Cada funcionalidade adicionada deve contribuir para resolver um problema real relacionado às reuniões e se integrar ao fluxo de antes, durante e depois do encontro, sem transformar o CONECTA+ em uma suíte genérica.

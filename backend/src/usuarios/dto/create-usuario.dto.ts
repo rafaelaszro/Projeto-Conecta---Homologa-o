@@ -1,5 +1,4 @@
 import {
-  IsBoolean,
   IsEmail,
   IsEnum,
   IsOptional,
@@ -7,7 +6,7 @@ import {
   MinLength,
 } from 'class-validator';
 
-import { TipoUsuario } from '../schemas/usuario.schema.js';
+import { TemaUsuario } from '../schemas/usuario.schema.js';
 
 export class CreateUsuarioDto {
   @IsString()
@@ -18,18 +17,10 @@ export class CreateUsuarioDto {
   email: string;
 
   @IsString()
-  @MinLength(6)
+  @MinLength(8)
   senha: string;
 
   @IsOptional()
-  @IsEnum(TipoUsuario)
-  tipo?: TipoUsuario;
-
-  @IsOptional()
-  @IsString()
-  tema?: string;
-
-  @IsOptional()
-  @IsBoolean()
-  ativo?: boolean;
+  @IsEnum(TemaUsuario)
+  tema?: TemaUsuario;
 }

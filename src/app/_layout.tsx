@@ -17,9 +17,7 @@ import {
   useFonts,
 } from '@expo-google-fonts/poppins';
 
-import { CORES } from '@/constants/theme';
-
-import '../global.css';
+import { TemaProvider, useTema } from '@/contexts/TemaContext';
 
 SplashScreen.preventAutoHideAsync();
 
@@ -42,12 +40,22 @@ export default function LayoutRaiz() {
   }
 
   return (
+    <TemaProvider>
+      <ConteudoRaiz />
+    </TemaProvider>
+  );
+}
+
+function ConteudoRaiz() {
+  const { cores, temaEfetivo } = useTema();
+
+  return (
     <>
-      <StatusBar style="dark" />
+      <StatusBar style={temaEfetivo === 'escuro' ? 'light' : 'dark'} />
       <Stack
         screenOptions={{
           headerShown: false,
-          contentStyle: { backgroundColor: CORES.FUNDO },
+          contentStyle: { backgroundColor: cores.fundo },
         }}
       />
     </>

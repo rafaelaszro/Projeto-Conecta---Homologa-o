@@ -7,7 +7,7 @@ A proposta completa do projeto está em [`PropostaInicial/objetivos.md`](Propost
 
 ## Situação atual
 
-**Incremento 1 — Cadastro de usuário: tela de login implementada.**
+**Incremento 1 — autenticação, cadastro, perfil, senha, tema e solicitação de cadastro de organização implementados.**
 
 A tela de login autentica o usuário e mostra em que situação está a sua
 solicitação de acesso à organização, ligando o login ao fluxo de cadastro:
@@ -28,8 +28,9 @@ A documentação do requisito, os casos de teste e as evidências estão em
   <img src="docs/incremento-1/evidencias/04-pendente-aprovacao.png" width="240" alt="Cadastro em análise" />
 </p>
 
-As telas de cadastro de usuário e de recuperação de conta ainda não foram
-implementadas: existem como destino de navegação, identificadas na própria tela.
+As configurações do usuário incluem edição de nome/e-mail, tema claro, escuro ou
+do sistema, troca autenticada de senha e recuperação por link temporário enviado
+por e-mail.
 
 ## Tecnologias
 
@@ -37,7 +38,7 @@ Conforme definido na proposta inicial:
 
 - **React Native** com **Expo** (SDK 57) — Android e iOS
 - **Expo Router** — navegação entre telas
-- **NativeWind** — estilos por classes, mantendo o padrão visual
+- **StyleSheet do React Native** — estilos nativos compatíveis com Android e iOS
 - **TypeScript**
 
 ## Como executar
@@ -62,6 +63,11 @@ EXPO_PUBLIC_API_URL=http://192.168.0.10:3000 npm start
 O aplicativo chama `POST /auth/login`. Se a variável não estiver definida, o
 login falhará informando que não foi possível conectar ao servidor.
 
+Para o envio real de recuperação de conta, configure no backend `MAIL_HOST`,
+`MAIL_PORT`, `MAIL_USER`, `MAIL_PASS`, `MAIL_FROM` e `APP_RESET_URL`. Sem SMTP,
+o backend usa o transporte JSON do Nodemailer e imprime o link no terminal para
+testes locais.
+
 ## Estrutura
 
 ```
@@ -69,8 +75,11 @@ src/
 ├── app/                     rotas (Expo Router)
 │   ├── (auth)/
 │   │   ├── login.tsx        tela de login
-│   │   ├── cadastro.tsx     cadastro de usuário (próximo requisito)
-│   │   └── recuperar-conta.tsx  recuperação de conta (próximo requisito)
+│   │   ├── cadastro.tsx     cadastro de usuário
+│   │   ├── recuperar-conta.tsx  solicitação do link de recuperação
+│   │   └── redefinir-senha.tsx  criação da nova senha pelo link
+│   ├── perfil.tsx           dados pessoais e tema preferido
+│   ├── alterar-senha.tsx    troca autenticada de senha
 │   └── inicio.tsx           destino do login aprovado
 ├── components/              componentes reutilizáveis das telas
 ├── constants/theme.ts       cores e tipografia da identidade visual
@@ -84,7 +93,7 @@ src/
 
 As cores, a tipografia (Poppins) e o logotipo vêm do documento de identidade
 visual do projeto (`PropostaInicial/Topico3.pdf`) e estão centralizados em
-[`src/constants/theme.ts`](src/constants/theme.ts) e em `tailwind.config.js`.
+[`src/constants/theme.ts`](src/constants/theme.ts), com aplicação por `StyleSheet`.
 
 | | | | | | | |
 | --- | --- | --- | --- | --- | --- | --- |

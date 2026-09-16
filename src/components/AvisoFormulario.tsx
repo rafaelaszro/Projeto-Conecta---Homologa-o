@@ -6,7 +6,7 @@
  * organização vinculada).
  */
 
-import { Text, View } from 'react-native';
+import { StyleSheet, Text, View } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 
 import { CORES } from '@/constants/theme';
@@ -45,19 +45,37 @@ export function AvisoFormulario({ aviso }: AvisoFormularioProps) {
       accessible
       accessibilityRole="alert"
       accessibilityLabel={`${aviso.titulo}. ${aviso.mensagem}`}
-      className="w-full flex-row rounded-2xl p-4"
-      style={{ backgroundColor: aparencia.fundo, borderWidth: 1, borderColor: aparencia.borda }}
+      style={[styles.container, { backgroundColor: aparencia.fundo, borderColor: aparencia.borda }]}
     >
       <Ionicons name={aparencia.icone} size={20} color={aparencia.cor} />
 
-      <View className="ml-3 flex-1">
-        <Text className="font-semibold text-[13px]" style={{ color: aparencia.cor }}>
+      <View style={styles.conteudo}>
+        <Text style={[styles.titulo, { color: aparencia.cor }]}>
           {aviso.titulo}
         </Text>
-        <Text className="mt-1 font-regular text-[13px] leading-5 text-texto-medio">
+        <Text style={styles.mensagem}>
           {aviso.mensagem}
         </Text>
       </View>
     </View>
   );
 }
+
+const styles = StyleSheet.create({
+  container: {
+    width: '100%',
+    flexDirection: 'row',
+    borderRadius: 16,
+    padding: 16,
+    borderWidth: 1,
+  },
+  conteudo: { flex: 1, marginLeft: 12 },
+  titulo: { fontFamily: 'Poppins_600SemiBold', fontSize: 13 },
+  mensagem: {
+    marginTop: 4,
+    fontFamily: 'Poppins_400Regular',
+    fontSize: 13,
+    lineHeight: 20,
+    color: CORES.TEXTO_MEDIO,
+  },
+});
