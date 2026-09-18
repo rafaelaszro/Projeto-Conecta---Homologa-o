@@ -115,6 +115,7 @@ async function autenticarNaApi(credenciais: Credenciais): Promise<ResultadoLogin
       id: corpo.usuario.id,
       nome: corpo.usuario.nome,
       email: corpo.usuario.email,
+      tipo: corpo.usuario.tipo ?? 'USUARIO',
       statusAcesso: corpo.usuario.statusAcesso ?? 'ATIVO',
       organizacao: corpo.usuario.organizacao ?? null,
       tema:

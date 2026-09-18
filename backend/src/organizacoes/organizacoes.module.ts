@@ -10,9 +10,11 @@ import {
 } from './schemas/organizacao.schema.js';
 
 import { Usuario, UsuarioSchema } from '../usuarios/schemas/usuario.schema.js';
+import { AuthModule } from '../auth/auth.module.js';
 
 @Module({
   imports: [
+    AuthModule,
     MongooseModule.forFeature([
       {
         name: Organizacao.name,

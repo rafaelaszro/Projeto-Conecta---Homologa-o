@@ -2,9 +2,8 @@
  * Destino do login bem-sucedido.
  *
  * Confirma a autenticação e a organização vinculada, e dá acesso à solicitação
- * de criação de organização do requisito "Cadastro de organização". As telas de
- * reuniões, calendário e histórico descritas na proposta entram nos incrementos
- * seguintes.
+ * de criação de organização do requisito "Cadastro de organização". Para o
+ * administrador do sistema, também dá acesso ao gerenciamento de organizações.
  */
 
 import { Pressable, StyleSheet, Text, View } from 'react-native';
@@ -21,10 +20,10 @@ export default function TelaInicio() {
   const router = useRouter();
   const { cores } = useTema();
 
-  const { id, nome, organizacao } = useLocalSearchParams<{
-    id?: string;
+  const { nome, organizacao, tipo } = useLocalSearchParams<{
     nome?: string;
     organizacao?: string;
+    tipo?: string;
   }>();
 
   return (
@@ -68,10 +67,34 @@ export default function TelaInicio() {
           </Text>
         </View>
 
+        {tipo === 'ADMIN_SISTEMA' ? (
+          <Pressable
+            onPress={() => router.push('/organizacao/aprovacao')}
+            accessibilityRole="button"
+            accessibilityLabel="Gerenciar organizações"
+            style={({ pressed }) => [
+              styles.acaoOrganizacao,
+              { backgroundColor: cores.cartao },
+              pressed && styles.pressionado,
+            ]}
+          >
+            <View style={styles.iconeOrganizacao}>
+              <Ionicons name="shield-checkmark-outline" size={20} color={CORES.AZUL} />
+            </View>
+
+            <View style={styles.textoOrganizacao}>
+              <Text style={[styles.tituloAcao, { color: cores.textoForte }]}>Gerenciar organizações</Text>
+              <Text style={[styles.descricaoAcao, { color: cores.textoMedio }]}>
+                Autorize, revogue ou edite as organizações cadastradas.
+              </Text>
+            </View>
+
+            <Ionicons name="chevron-forward" size={18} color={CORES.TEXTO_FRACO} />
+          </Pressable>
+        ) : null}
+
         <Pressable
-          onPress={() =>
-            router.push({ pathname: '/organizacao/cadastro', params: { usuarioId: id ?? '' } })
-          }
+          onPress={() => router.push('/organizacao/cadastro')}
           accessibilityRole="button"
           accessibilityLabel="Criar organização"
           style={({ pressed }) => [styles.acaoOrganizacao, { backgroundColor: cores.cartao }, pressed && styles.pressionado]}

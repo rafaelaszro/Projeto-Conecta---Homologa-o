@@ -31,7 +31,7 @@ const SEM_ERROS: ErrosDeCampo = { nome: null, descricao: null };
  * @param usuarioId identificador de quem está solicitando a criação. Enquanto o
  * backend não tem o guard de JWT, ele chega pela navegação vinda do login.
  */
-export function useCadastroOrganizacao(usuarioId: string | null) {
+export function useCadastroOrganizacao() {
   const [nome, definirNome] = useState('');
   const [descricao, definirDescricao] = useState('');
   const [erros, definirErros] = useState<ErrosDeCampo>(SEM_ERROS);
@@ -62,19 +62,10 @@ export function useCadastroOrganizacao(usuarioId: string | null) {
       return;
     }
 
-    if (usuarioId === null || usuarioId.length === 0) {
-      definirAviso({
-        tom: 'erro',
-        titulo: 'Conta não identificada',
-        mensagem: MENSAGENS_ERRO_ORGANIZACAO[ERRO_ORGANIZACAO.USUARIO_NAO_ENCONTRADO],
-      });
-      return;
-    }
-
     definirAviso(null);
     definirCarregando(true);
 
-    const resultado = await cadastrarOrganizacao({ nome, descricao, criadaPor: usuarioId });
+    const resultado = await cadastrarOrganizacao({ nome, descricao });
 
     definirCarregando(false);
 
@@ -97,7 +88,7 @@ export function useCadastroOrganizacao(usuarioId: string | null) {
       titulo: 'Não foi possível enviar',
       mensagem: MENSAGENS_ERRO_ORGANIZACAO[resultado.erro],
     });
-  }, [carregando, descricao, nome, usuarioId]);
+  }, [carregando, descricao, nome]);
 
   return {
     nome,

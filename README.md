@@ -56,9 +56,16 @@ Depois, leia o QR Code com o aplicativo **Expo Go** ou use `npm run android` /
 O aplicativo usa exclusivamente a API NestJS. Defina a variável de ambiente e
 reinicie o Expo:
 
-```bash
-EXPO_PUBLIC_API_URL=http://192.168.0.10:3000 npm start
+No PowerShell, descubra o IPv4 da conexão Wi-Fi com `ipconfig`, coloque-o no
+arquivo `.env` e reinicie o Expo. Exemplo:
+
+```env
+EXPO_PUBLIC_API_URL=http://192.168.3.87:3000
 ```
+
+O iPhone e o computador precisam estar na mesma rede. Não use `localhost` nem
+`127.0.0.1`: no iPhone esses endereços apontam para o próprio aparelho. O
+backend deve continuar ouvindo em `0.0.0.0:3000`.
 
 O aplicativo chama `POST /auth/login`. Se a variável não estiver definida, o
 login falhará informando que não foi possível conectar ao servidor.
@@ -67,6 +74,11 @@ Para o envio real de recuperação de conta, configure no backend `MAIL_HOST`,
 `MAIL_PORT`, `MAIL_USER`, `MAIL_PASS`, `MAIL_FROM` e `APP_RESET_URL`. Sem SMTP,
 o backend usa o transporte JSON do Nodemailer e imprime o link no terminal para
 testes locais.
+
+Ao iniciar, o backend também garante a existência de um administrador do
+sistema. Configure `ROOT_USER_NAME`, `ROOT_USER_EMAIL` e `ROOT_USER_PASSWORD`
+no arquivo `backend/.env`. Esse usuário pode acessar a tela de gerenciamento
+para autorizar, revogar e editar organizações.
 
 ## Estrutura
 

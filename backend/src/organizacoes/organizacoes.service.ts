@@ -36,10 +36,8 @@ export class OrganizacoesService {
     private readonly usuarioModel: Model<UsuarioDocument>,
   ) {}
 
-  async criar(createOrganizacaoDto: CreateOrganizacaoDto) {
-    const usuario = await this.usuarioModel
-      .findById(createOrganizacaoDto.criadaPor)
-      .exec();
+  async criar(usuarioId: string, createOrganizacaoDto: CreateOrganizacaoDto) {
+    const usuario = await this.usuarioModel.findById(usuarioId).exec();
 
     if (!usuario) {
       throw new NotFoundException('Usuário criador não encontrado');
@@ -48,12 +46,12 @@ export class OrganizacoesService {
     const organizacao = await this.organizacaoModel.create({
       nome: createOrganizacaoDto.nome,
       descricao: createOrganizacaoDto.descricao,
-      criadaPor: new Types.ObjectId(createOrganizacaoDto.criadaPor),
-      status: createOrganizacaoDto.status ?? StatusOrganizacao.PENDENTE,
+      criadaPor: new Types.ObjectId(usuarioId),
+      status: StatusOrganizacao.PENDENTE,
 
       membros: [
         {
-          usuarioId: new Types.ObjectId(createOrganizacaoDto.criadaPor),
+          usuarioId: new Types.ObjectId(usuarioId),
           papel: PapelOrganizacao.ADMIN,
           status: StatusMembroOrganizacao.APROVADO,
           solicitadoEm: new Date(),

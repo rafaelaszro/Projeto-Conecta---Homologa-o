@@ -3,6 +3,7 @@ import {
   ConflictException,
   Injectable,
   NotFoundException,
+  OnApplicationBootstrap,
 } from '@nestjs/common';
 
 import { InjectModel } from '@nestjs/mongoose';
@@ -11,7 +12,11 @@ import { Model, Types } from 'mongoose';
 
 import * as bcrypt from 'bcrypt';
 
-import { Usuario, UsuarioDocument } from './schemas/usuario.schema.js';
+import {
+  TipoUsuario,
+  Usuario,
+  UsuarioDocument,
+} from './schemas/usuario.schema.js';
 
 import { CreateUsuarioDto } from './dto/create-usuario.dto.js';
 
@@ -19,12 +24,42 @@ import { UpdateUsuarioDto } from './dto/update-usuario.dto.js';
 import { AtualizarPerfilDto } from './dto/atualizar-perfil.dto.js';
 import { AlterarSenhaDto } from './dto/alterar-senha.dto.js';
 
+const ADMIN_PADRAO = {
+  nome: 'Administrador do Sistema',
+  email: 'admin@admin.com',
+  senha: 'Admin@123',
+};
+
 @Injectable()
-export class UsuariosService {
+export class UsuariosService implements OnApplicationBootstrap {
   constructor(
     @InjectModel(Usuario.name)
     private readonly usuarioModel: Model<UsuarioDocument>,
   ) {}
+
+  /** Garante que sempre exista um administrador do sistema após a conexão com o banco. */
+  async onApplicationBootstrap() {
+    const nome = process.env.ROOT_USER_NAME?.trim() || ADMIN_PADRAO.nome;
+    const email = (process.env.ROOT_USER_EMAIL?.trim() || ADMIN_PADRAO.email).toLowerCase();
+    const senha = process.env.ROOT_USER_PASSWORD || ADMIN_PADRAO.senha;
+
+    const existe = await this.usuarioModel
+      .exists({
+        $or: [{ tipo: TipoUsuario.ADMIN_SISTEMA }, { email }],
+      })
+      .exec();
+
+    if (existe) {
+      return;
+    }
+
+    await this.usuarioModel.create({
+      nome,
+      email,
+      senhaHash: await bcrypt.hash(senha, 10),
+      tipo: TipoUsuario.ADMIN_SISTEMA,
+    });
+  }
 
   async criar(createUsuarioDto: CreateUsuarioDto) {
     const email = createUsuarioDto.email.toLowerCase().trim();

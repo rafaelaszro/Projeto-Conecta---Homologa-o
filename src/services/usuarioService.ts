@@ -11,7 +11,7 @@ export type PerfilUsuario = {
 
 type Resultado<T> = { sucesso: true; dados: T } | { sucesso: false; mensagem: string };
 
-async function requisicaoAutenticada<T>(caminho: string, init?: RequestInit): Promise<Resultado<T>> {
+export async function requisicaoAutenticada<T>(caminho: string, init?: RequestInit): Promise<Resultado<T>> {
   const token = await obterToken();
 
   if (!URL_API || !token) {

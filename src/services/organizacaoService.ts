@@ -5,20 +5,22 @@
  * a solicitação e a organização nasce com status PENDENTE, aguardando a
  * autorização de um administrador do sistema.
  *
- * O campo `status` nunca é enviado pelo aplicativo. Quem autoriza ou revoga uma
- * organização é o administrador do sistema, pelo backend.
+ * O cadastro nunca envia o campo `status`. Só a tela de gerenciamento, usada
+ * pelo administrador do sistema, altera o status para autorizar ou revogar.
  *
- * Enquanto o backend não tem o guard de JWT, o identificador de quem solicitou
- * viaja no corpo da requisição, no campo `criadaPor`.
+ * Todas as chamadas enviam o token do login. O backend identifica pelo token
+ * quem cadastrou e restringe o gerenciamento ao administrador do sistema.
  */
 
 import { URL_API } from '@/services/authService';
+import { obterToken } from '@/services/sessaoService';
+import { requisicaoAutenticada } from '@/services/usuarioService';
 
 /** Motivos pelos quais o cadastro da organização pode falhar. */
 export const ERRO_ORGANIZACAO = {
   /** Já existe uma organização cadastrada com o mesmo nome. */
   NOME_EM_USO: 'NOME_EM_USO',
-  /** O backend não encontrou o usuário informado como criador. */
+  /** A sessão expirou ou o backend não encontrou a conta de quem cadastrou. */
   USUARIO_NAO_ENCONTRADO: 'USUARIO_NAO_ENCONTRADO',
   /** O backend recusou os dados enviados. */
   ERRO_VALIDACAO: 'ERRO_VALIDACAO',
@@ -45,8 +47,6 @@ export const MENSAGENS_ERRO_ORGANIZACAO: Record<ErroOrganizacao, string> = {
 export type DadosCadastroOrganizacao = {
   nome: string;
   descricao: string;
-  /** Identificador do usuário que está solicitando a criação. */
-  criadaPor: string;
 };
 
 export type ResultadoCadastroOrganizacao =
@@ -66,6 +66,12 @@ export async function cadastrarOrganizacao(
     return { criada: false, erro: ERRO_ORGANIZACAO.FALHA_CONEXAO };
   }
 
+  const token = await obterToken();
+
+  if (!token) {
+    return { criada: false, erro: ERRO_ORGANIZACAO.USUARIO_NAO_ENCONTRADO };
+  }
+
   const descricao = dados.descricao.trim();
 
   let resposta: Response;
@@ -73,10 +79,9 @@ export async function cadastrarOrganizacao(
   try {
     resposta = await fetch(`${URL_API}/organizacoes`, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
       body: JSON.stringify({
         nome: dados.nome.trim(),
-        criadaPor: dados.criadaPor,
         ...(descricao.length > 0 ? { descricao } : {}),
       }),
     });
@@ -88,7 +93,7 @@ export async function cadastrarOrganizacao(
     return { criada: false, erro: ERRO_ORGANIZACAO.NOME_EM_USO };
   }
 
-  if (resposta.status === 404) {
+  if (resposta.status === 401 || resposta.status === 404) {
     return { criada: false, erro: ERRO_ORGANIZACAO.USUARIO_NAO_ENCONTRADO };
   }
 
@@ -101,4 +106,31 @@ export async function cadastrarOrganizacao(
   }
 
   return { criada: true };
+}
+
+export type StatusOrganizacao = 'PENDENTE' | 'APROVADA' | 'REVOGADA';
+
+export type Organizacao = {
+  _id: string;
+  nome: string;
+  descricao?: string;
+  status: StatusOrganizacao;
+  criadaPor: { nome: string } | null;
+};
+
+export type DadosAtualizacaoOrganizacao = {
+  nome?: string;
+  descricao?: string;
+  status?: StatusOrganizacao;
+};
+
+export function listarOrganizacoes() {
+  return requisicaoAutenticada<Organizacao[]>('/organizacoes');
+}
+
+export function atualizarOrganizacao(id: string, dados: DadosAtualizacaoOrganizacao) {
+  return requisicaoAutenticada<Organizacao>(`/organizacoes/${id}`, {
+    method: 'PATCH',
+    body: JSON.stringify(dados),
+  });
 }

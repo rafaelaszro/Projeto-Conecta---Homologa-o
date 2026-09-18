@@ -14,7 +14,7 @@ import { KeyboardAvoidingView, Platform, Pressable, ScrollView, StyleSheet, Text
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
-import { useLocalSearchParams, useRouter } from 'expo-router';
+import { useRouter } from 'expo-router';
 
 import { AvisoFormulario } from '@/components/AvisoFormulario';
 import { BotaoPrimario } from '@/components/BotaoPrimario';
@@ -29,10 +29,6 @@ export default function TelaCadastroOrganizacao() {
   const { cores, temaEfetivo } = useTema();
   const gradiente = temaEfetivo === 'escuro' ? [cores.fundo, '#15182d', cores.fundo] as const : GRADIENTE_FUNDO;
 
-  // Enquanto o backend não tem o guard de JWT, o identificador do usuário chega
-  // pela navegação, no mesmo formato já usado pela tela de início.
-  const { usuarioId } = useLocalSearchParams<{ usuarioId?: string }>();
-
   const {
     nome,
     descricao,
@@ -46,7 +42,7 @@ export default function TelaCadastroOrganizacao() {
     aoDigitarNome,
     aoDigitarDescricao,
     submeter,
-  } = useCadastroOrganizacao(usuarioId ?? null);
+  } = useCadastroOrganizacao();
 
   return (
     <LinearGradient colors={[...gradiente]} style={{ flex: 1 }}>

@@ -148,6 +148,7 @@ export function useLogin() {
         nome: resultado.usuario.nome,
         organizacao: resultado.usuario.organizacao ?? '',
         email: resultado.usuario.email,
+        tipo: resultado.usuario.tipo,
         tema: resultado.usuario.tema,
       },
     });

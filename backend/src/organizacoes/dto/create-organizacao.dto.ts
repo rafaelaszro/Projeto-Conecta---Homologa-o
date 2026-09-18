@@ -1,12 +1,4 @@
-import {
-  IsEnum,
-  IsMongoId,
-  IsOptional,
-  IsString,
-  MinLength,
-} from 'class-validator';
-
-import { StatusOrganizacao } from '../schemas/organizacao.schema.js';
+import { IsOptional, IsString, MinLength } from 'class-validator';
 
 export class CreateOrganizacaoDto {
   @IsString()
@@ -17,10 +9,4 @@ export class CreateOrganizacaoDto {
   @IsString()
   descricao?: string;
 
-  @IsMongoId()
-  criadaPor: string;
-
-  @IsOptional()
-  @IsEnum(StatusOrganizacao)
-  status?: StatusOrganizacao;
 }
