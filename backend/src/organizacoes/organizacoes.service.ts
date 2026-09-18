@@ -1,6 +1,7 @@
 import {
   BadRequestException,
   ConflictException,
+  ForbiddenException,
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
@@ -23,7 +24,6 @@ import {
 
 import { CreateOrganizacaoDto } from './dto/create-organizacao.dto.js';
 import { UpdateOrganizacaoDto } from './dto/update-organizacao.dto.js';
-import { AddMembroOrganizacaoDto } from './dto/add-membro-organizacao.dto.js';
 import { UpdateStatusMembroDto } from './dto/update-status-membro.dto.js';
 
 @Injectable()
@@ -36,10 +36,8 @@ export class OrganizacoesService {
     private readonly usuarioModel: Model<UsuarioDocument>,
   ) {}
 
-  async criar(createOrganizacaoDto: CreateOrganizacaoDto) {
-    const usuario = await this.usuarioModel
-      .findById(createOrganizacaoDto.criadaPor)
-      .exec();
+  async criar(createOrganizacaoDto: CreateOrganizacaoDto, usuarioId: string) {
+    const usuario = await this.usuarioModel.findById(usuarioId).exec();
 
     if (!usuario) {
       throw new NotFoundException('Usuário criador não encontrado');
@@ -48,12 +46,12 @@ export class OrganizacoesService {
     const organizacao = await this.organizacaoModel.create({
       nome: createOrganizacaoDto.nome,
       descricao: createOrganizacaoDto.descricao,
-      criadaPor: new Types.ObjectId(createOrganizacaoDto.criadaPor),
-      status: createOrganizacaoDto.status ?? StatusOrganizacao.PENDENTE,
+      criadaPor: new Types.ObjectId(usuarioId),
+      status: StatusOrganizacao.PENDENTE,
 
       membros: [
         {
-          usuarioId: new Types.ObjectId(createOrganizacaoDto.criadaPor),
+          usuarioId: new Types.ObjectId(usuarioId),
           papel: PapelOrganizacao.ADMIN,
           status: StatusMembroOrganizacao.APROVADO,
           solicitadoEm: new Date(),
@@ -67,14 +65,18 @@ export class OrganizacoesService {
 
   async listar() {
     return this.organizacaoModel
-      .find()
-      .populate('criadaPor', 'nome email tipo ativo')
-      .populate('membros.usuarioId', 'nome email tipo ativo')
+      .find({ status: StatusOrganizacao.APROVADA })
+      .select('nome descricao status')
       .sort({ criadoEm: -1 })
       .exec();
   }
 
-  async buscarPorId(id: string) {
+  async buscarPorId(id: string, solicitanteId: string) {
+    await this.exigirAdministrador(id, solicitanteId);
+    return this.detalhes(id);
+  }
+
+  private async detalhes(id: string) {
     this.validarId(id);
 
     const organizacao = await this.organizacaoModel
@@ -131,9 +133,9 @@ export class OrganizacoesService {
     };
   }
 
-  async adicionarMembro(id: string, addMembroDto: AddMembroOrganizacaoDto) {
+  async adicionarMembro(id: string, usuarioId: string) {
     this.validarId(id);
-    this.validarId(addMembroDto.usuarioId);
+    this.validarId(usuarioId);
 
     const organizacao = await this.organizacaoModel.findById(id).exec();
 
@@ -141,16 +143,16 @@ export class OrganizacoesService {
       throw new NotFoundException('Organização não encontrada');
     }
 
-    const usuario = await this.usuarioModel
-      .findById(addMembroDto.usuarioId)
-      .exec();
+    this.exigirOrganizacaoAprovada(organizacao);
 
-    if (!usuario) {
+    const usuario = await this.usuarioModel.findById(usuarioId).exec();
+
+    if (!usuario || !usuario.ativo) {
       throw new NotFoundException('Usuário não encontrado');
     }
 
     const jaExiste = organizacao.membros.some(
-      (membro) => membro.usuarioId.toString() === addMembroDto.usuarioId,
+      (membro) => membro.usuarioId.toString() === usuarioId,
     );
 
     if (jaExiste) {
@@ -159,30 +161,51 @@ export class OrganizacoesService {
       );
     }
 
-    organizacao.membros.push({
-      usuarioId: new Types.ObjectId(addMembroDto.usuarioId),
-      papel: addMembroDto.papel ?? PapelOrganizacao.MEMBRO,
+    const membro = {
+      usuarioId: new Types.ObjectId(usuarioId),
+      papel: PapelOrganizacao.MEMBRO,
       status: StatusMembroOrganizacao.PENDENTE,
       solicitadoEm: new Date(),
-    });
-
-    await organizacao.save();
-
-    return this.buscarPorId(id);
+    };
+    // O filtro evita duplicação mesmo quando duas solicitações chegam juntas.
+    const resultado = await this.organizacaoModel
+      .updateOne(
+        {
+          _id: id,
+          status: StatusOrganizacao.APROVADA,
+          'membros.usuarioId': { $ne: membro.usuarioId },
+        },
+        { $push: { membros: membro } },
+      )
+      .exec();
+    if (resultado.modifiedCount !== 1) {
+      throw new ConflictException(
+        'Solicitação já registrada ou organização indisponível',
+      );
+    }
+    return { mensagem: 'Solicitação enviada para análise', membro };
   }
 
   async atualizarStatusMembro(
     id: string,
     usuarioId: string,
     updateStatusDto: UpdateStatusMembroDto,
+    solicitanteId: string,
   ) {
     this.validarId(id);
     this.validarId(usuarioId);
 
-    const organizacao = await this.organizacaoModel.findById(id).exec();
-
-    if (!organizacao) {
-      throw new NotFoundException('Organização não encontrada');
+    const organizacao = await this.exigirAdministrador(id, solicitanteId);
+    this.exigirOrganizacaoAprovada(organizacao);
+    if (
+      ![
+        StatusMembroOrganizacao.APROVADO,
+        StatusMembroOrganizacao.REJEITADO,
+      ].includes(updateStatusDto.status)
+    ) {
+      throw new BadRequestException(
+        'Escolha aprovar ou rejeitar a solicitação',
+      );
     }
 
     const membro = organizacao.membros.find(
@@ -193,17 +216,94 @@ export class OrganizacoesService {
       throw new NotFoundException('Membro não encontrado nesta organização');
     }
 
-    membro.status = updateStatusDto.status;
-
-    if (updateStatusDto.status === StatusMembroOrganizacao.APROVADO) {
-      membro.aprovadoEm = new Date();
-    } else {
-      membro.aprovadoEm = undefined;
+    if (membro.status !== StatusMembroOrganizacao.PENDENTE) {
+      throw new ConflictException(
+        'Apenas solicitações pendentes podem ser analisadas',
+      );
     }
 
-    await organizacao.save();
+    const resultado = await this.organizacaoModel
+      .updateOne(
+        {
+          _id: id,
+          status: StatusOrganizacao.APROVADA,
+          $and: [
+            {
+              membros: {
+                $elemMatch: {
+                  usuarioId: new Types.ObjectId(solicitanteId),
+                  papel: PapelOrganizacao.ADMIN,
+                  status: StatusMembroOrganizacao.APROVADO,
+                },
+              },
+            },
+            {
+              membros: {
+                $elemMatch: {
+                  usuarioId: new Types.ObjectId(usuarioId),
+                  status: StatusMembroOrganizacao.PENDENTE,
+                },
+              },
+            },
+          ],
+        },
+        updateStatusDto.status === StatusMembroOrganizacao.APROVADO
+          ? {
+              $set: {
+                'membros.$[alvo].status': updateStatusDto.status,
+                'membros.$[alvo].aprovadoEm': new Date(),
+              },
+            }
+          : {
+              $set: { 'membros.$[alvo].status': updateStatusDto.status },
+              $unset: { 'membros.$[alvo].aprovadoEm': '' },
+            },
+        {
+          arrayFilters: [
+            {
+              'alvo.usuarioId': new Types.ObjectId(usuarioId),
+              'alvo.status': StatusMembroOrganizacao.PENDENTE,
+            },
+          ],
+        },
+      )
+      .exec();
+    if (resultado.modifiedCount !== 1) {
+      throw new ConflictException(
+        'A solicitação ou as permissões foram alteradas. Atualize a lista',
+      );
+    }
+    return {
+      mensagem: 'Solicitação analisada',
+      usuarioId,
+      status: updateStatusDto.status,
+    };
+  }
 
-    return this.buscarPorId(id);
+  private async exigirAdministrador(id: string, usuarioId: string) {
+    this.validarId(id);
+    this.validarId(usuarioId);
+    const organizacao = await this.organizacaoModel.findById(id).exec();
+    if (!organizacao) throw new NotFoundException('Organização não encontrada');
+    const administrador = organizacao.membros.some(
+      (membro) =>
+        membro.usuarioId.toString() === usuarioId &&
+        membro.papel === PapelOrganizacao.ADMIN &&
+        membro.status === StatusMembroOrganizacao.APROVADO,
+    );
+    if (!administrador)
+      throw new ForbiddenException(
+        'Apenas administradores desta organização podem realizar esta operação',
+      );
+    return organizacao;
+  }
+
+  private exigirOrganizacaoAprovada(organizacao: Organizacao) {
+    if (organizacao.status !== StatusOrganizacao.APROVADA) {
+      throw new ForbiddenException(
+        'A organização não está aprovada para receber ou analisar solicitações',
+      );
+    }
   }
 
   private validarId(id: string) {

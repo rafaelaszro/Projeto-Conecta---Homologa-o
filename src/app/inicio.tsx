@@ -21,8 +21,7 @@ export default function TelaInicio() {
   const router = useRouter();
   const { cores } = useTema();
 
-  const { id, nome, organizacao } = useLocalSearchParams<{
-    id?: string;
+  const { nome, organizacao } = useLocalSearchParams<{
     nome?: string;
     organizacao?: string;
   }>();
@@ -70,7 +69,7 @@ export default function TelaInicio() {
 
         <Pressable
           onPress={() =>
-            router.push({ pathname: '/organizacao/cadastro', params: { usuarioId: id ?? '' } })
+            router.push('/organizacao/cadastro')
           }
           accessibilityRole="button"
           accessibilityLabel="Criar organização"

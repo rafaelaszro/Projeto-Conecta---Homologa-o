@@ -8,11 +8,11 @@
  * O campo `status` nunca é enviado pelo aplicativo. Quem autoriza ou revoga uma
  * organização é o administrador do sistema, pelo backend.
  *
- * Enquanto o backend não tem o guard de JWT, o identificador de quem solicitou
- * viaja no corpo da requisição, no campo `criadaPor`.
+ * O servidor identifica quem solicitou pela sessão autenticada.
  */
 
 import { URL_API } from '@/services/authService';
+import { obterToken } from '@/services/sessaoService';
 
 /** Motivos pelos quais o cadastro da organização pode falhar. */
 export const ERRO_ORGANIZACAO = {
@@ -45,8 +45,6 @@ export const MENSAGENS_ERRO_ORGANIZACAO: Record<ErroOrganizacao, string> = {
 export type DadosCadastroOrganizacao = {
   nome: string;
   descricao: string;
-  /** Identificador do usuário que está solicitando a criação. */
-  criadaPor: string;
 };
 
 export type ResultadoCadastroOrganizacao =
@@ -71,12 +69,13 @@ export async function cadastrarOrganizacao(
   let resposta: Response;
 
   try {
+    const token = await obterToken();
+    if (!token) return { criada: false, erro: ERRO_ORGANIZACAO.USUARIO_NAO_ENCONTRADO };
     resposta = await fetch(`${URL_API}/organizacoes`, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
       body: JSON.stringify({
         nome: dados.nome.trim(),
-        criadaPor: dados.criadaPor,
         ...(descricao.length > 0 ? { descricao } : {}),
       }),
     });
@@ -88,7 +87,7 @@ export async function cadastrarOrganizacao(
     return { criada: false, erro: ERRO_ORGANIZACAO.NOME_EM_USO };
   }
 
-  if (resposta.status === 404) {
+  if (resposta.status === 401 || resposta.status === 403 || resposta.status === 404) {
     return { criada: false, erro: ERRO_ORGANIZACAO.USUARIO_NAO_ENCONTRADO };
   }
 
