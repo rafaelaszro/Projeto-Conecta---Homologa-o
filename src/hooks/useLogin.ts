@@ -142,8 +142,7 @@ export function useLogin() {
     router.replace({
       pathname: '/inicio',
       params: {
-        // O identificador segue para as telas que ainda precisam informar o
-        // usuário ao backend, enquanto o guard de JWT não existe.
+        // Dados de apresentação; operações protegidas usam o token da sessão.
         id: resultado.usuario.id,
         nome: resultado.usuario.nome,
         organizacao: resultado.usuario.organizacao ?? '',

@@ -93,7 +93,7 @@ export async function cadastrarOrganizacao(
     return { criada: false, erro: ERRO_ORGANIZACAO.NOME_EM_USO };
   }
 
-  if (resposta.status === 401 || resposta.status === 404) {
+  if (resposta.status === 401 || resposta.status === 403 || resposta.status === 404) {
     return { criada: false, erro: ERRO_ORGANIZACAO.USUARIO_NAO_ENCONTRADO };
   }
 

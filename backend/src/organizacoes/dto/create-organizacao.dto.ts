@@ -8,5 +8,4 @@ export class CreateOrganizacaoDto {
   @IsOptional()
   @IsString()
   descricao?: string;
-
 }

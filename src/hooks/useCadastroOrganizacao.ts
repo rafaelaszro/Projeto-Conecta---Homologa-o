@@ -27,10 +27,6 @@ type ErrosDeCampo = {
 
 const SEM_ERROS: ErrosDeCampo = { nome: null, descricao: null };
 
-/**
- * @param usuarioId identificador de quem está solicitando a criação. Enquanto o
- * backend não tem o guard de JWT, ele chega pela navegação vinda do login.
- */
 export function useCadastroOrganizacao() {
   const [nome, definirNome] = useState('');
   const [descricao, definirDescricao] = useState('');

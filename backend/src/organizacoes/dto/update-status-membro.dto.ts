@@ -1,8 +1,8 @@
-import { IsEnum } from 'class-validator';
+import { IsIn } from 'class-validator';
 
 import { StatusMembroOrganizacao } from '../schemas/organizacao.schema.js';
 
 export class UpdateStatusMembroDto {
-  @IsEnum(StatusMembroOrganizacao)
+  @IsIn([StatusMembroOrganizacao.APROVADO, StatusMembroOrganizacao.REJEITADO])
   status: StatusMembroOrganizacao;
 }
