@@ -6,7 +6,7 @@
  * administrador do sistema, também dá acesso ao gerenciamento de organizações.
  */
 
-import { Pressable, StyleSheet, Text, View } from 'react-native';
+import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { useLocalSearchParams, useRouter } from 'expo-router';
@@ -43,7 +43,7 @@ export default function TelaInicio() {
         </Pressable>
       </View>
 
-      <View style={styles.conteudo}>
+      <ScrollView contentContainerStyle={styles.conteudo}>
         <Text style={[styles.saudacao, { color: cores.textoForte }]}>
           Olá, {nome?.split(' ')[0] ?? 'bem-vindo'}!
         </Text>
@@ -113,6 +113,15 @@ export default function TelaInicio() {
           <Ionicons name="chevron-forward" size={18} color={CORES.TEXTO_FRACO} />
         </Pressable>
 
+        <Pressable accessibilityRole="button" accessibilityLabel="Gerenciar comissões" onPress={() => router.push('/comissoes')} style={({ pressed }) => [styles.acaoOrganizacao, { backgroundColor: cores.cartao }, pressed && styles.pressionado]}>
+          <View style={styles.iconeOrganizacao}><Ionicons name="people-outline" size={20} color={CORES.AZUL} /></View>
+          <View style={styles.textoOrganizacao}>
+            <Text style={[styles.tituloAcao, { color: cores.textoForte }]}>Comissões</Text>
+            <Text style={[styles.descricaoAcao, { color: cores.textoMedio }]}>Cadastre comissões e gerencie suas equipes.</Text>
+          </View>
+          <Ionicons name="chevron-forward" size={18} color={CORES.TEXTO_FRACO} />
+        </Pressable>
+
         <View style={styles.linhaConfiguracoes}>
           <Pressable onPress={() => router.push('/perfil')} style={({ pressed }) => [styles.atalho, { backgroundColor: cores.cartao }, pressed && styles.pressionado]}>
             <Ionicons name="person-circle-outline" size={22} color={CORES.AZUL} />
@@ -123,7 +132,7 @@ export default function TelaInicio() {
             <Text style={[styles.textoAtalho, { color: cores.textoForte }]}>Alterar senha</Text>
           </Pressable>
         </View>
-      </View>
+      </ScrollView>
     </SafeAreaView>
   );
 }
@@ -147,7 +156,7 @@ const styles = StyleSheet.create({
   },
   pressionado: { opacity: 0.9 },
   textoSair: { marginLeft: 8, fontFamily: 'Poppins_500Medium', fontSize: 13, color: CORES.TEXTO_MEDIO },
-  conteudo: { flex: 1, justifyContent: 'center', paddingHorizontal: 24 },
+  conteudo: { flexGrow: 1, justifyContent: 'center', paddingHorizontal: 24, paddingVertical: 24 },
   saudacao: { fontFamily: 'Poppins_700Bold', fontSize: 24, color: CORES.TEXTO_FORTE },
   organizacao: { marginTop: 4, fontFamily: 'Poppins_400Regular', fontSize: 14, color: CORES.TEXTO_MEDIO },
   cartaoAcesso: { marginTop: 24, borderRadius: 24, backgroundColor: CORES.CARTAO, padding: 20 },

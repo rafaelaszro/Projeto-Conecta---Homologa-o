@@ -1,4 +1,5 @@
 import { Module } from '@nestjs/common';
+import { AuthModule } from '../auth/auth.module.js';
 import { MongooseModule } from '@nestjs/mongoose';
 
 import { ComissoesController } from './comissoes.controller.js';
@@ -15,6 +16,7 @@ import {
 
 @Module({
   imports: [
+    AuthModule,
     MongooseModule.forFeature([
       {
         name: Comissao.name,
